@@ -5,7 +5,7 @@ blabla
 from collections import deque
 import random
 import itertools
-from enthought.util.math import norm
+
 
 class UPATrial:
     """
@@ -120,7 +120,7 @@ def compute_resilience(ugraph, attack_order):
         if n % 100 == 0:
             print 100*n/l, '%',
         ugraph = rm_node(ugraph, node)
-        #ugraph = tmp.delete_node(ugraph, node)
+        #ugraph = M2_help.delete_node(ugraph, node)
         lst.append(largest_cc_size(ugraph))
         #print ugraph
     print '\n'
@@ -207,10 +207,10 @@ def fast_targeted_order(ugraph):
 
 
 # print 'Creating ld graph...'
-import tmp
+
 # # NETWORK_URL = "alg_rf7.txt"
 # NETWORK_URL = "http://storage.googleapis.com/codeskulptor-alg/alg_rf7.txt"
-# ldg = tmp.load_graph(NETWORK_URL)
+# ldg = M2_help.load_graph(NETWORK_URL)
 # print 'Nodes: ', len(ldg)
 # print 'Edges:', edges(ldg)
 # ld = compute_resilience(ldg, random_order(ldg))
@@ -230,23 +230,6 @@ import tmp
 # print 'Edges:', edges(upag)
 # upa = compute_resilience(upag, random_order(upag))
 # print upa
-import time
-n = range(10, 1000, 10)
-m = 5
-norm = []
-fast = []
-for i in n:
-    g = upa_graph(i, m)
-    starttime = time.clock()
-    tmp.targeted_order(g)
-    endtime = time.clock()
-    norm.append(endtime-starttime)
-    starttime = time.clock()
-    fast_targeted_order(g)
-    endtime = time.clock()
-    fast.append(endtime-starttime)
-print norm
-print fast
 
 
 # import matplotlib.pyplot as plt
