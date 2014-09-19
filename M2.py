@@ -5,6 +5,7 @@ blabla
 from collections import deque
 import random
 import itertools
+from enthought.util.math import norm
 
 class UPATrial:
     """
@@ -183,58 +184,96 @@ def edges(ugraph):
         n += len(nodes)
     return n/2
 
-print 'Creating ld graph...'
+def fast_targeted_order(ugraph):
+    degreesets = {}
+    for degree in range(len(ugraph)):
+        degreesets[degree] = set()
+    for node in ugraph:
+        degree = len(ugraph[node])
+        degreesets[degree].add(node)
+    lst = []
+    i = 0
+    for degree in range(len(ugraph)-1, -1, -1):
+        while len(degreesets[degree]) > 0:
+            node = degreesets[degree].pop()
+            for neighber in ugraph[node]:
+                nb_deg = len(ugraph[neighber])
+                degreesets[nb_deg].remove(neighber)
+                degreesets[nb_deg - 1].add(neighber)
+            lst.append(node)
+            i += 1
+            ugraph = rm_node(ugraph, node)
+    return lst
+
+
+# print 'Creating ld graph...'
 import tmp
-NETWORK_URL = "alg_rf7.txt"
+# # NETWORK_URL = "alg_rf7.txt"
 # NETWORK_URL = "http://storage.googleapis.com/codeskulptor-alg/alg_rf7.txt"
-ldg = tmp.load_graph(NETWORK_URL)
-print 'Nodes: ', len(ldg)
-print 'Edges:', edges(ldg)
-ld = compute_resilience(ldg, random_order(ldg))
-print ld
+# ldg = tmp.load_graph(NETWORK_URL)
+# print 'Nodes: ', len(ldg)
+# print 'Edges:', edges(ldg)
+# ld = compute_resilience(ldg, random_order(ldg))
+# print ld
+# 
+# print 'Creating er graph...'
+# p = 3112/float(1347*1346/2)
+# erg = er_graph2(1347, p)
+# print 'Nodes: ', len(erg)
+# print 'Edges:', edges(erg)
+# er = compute_resilience(erg, random_order(erg))
+# print er
+# 
+# print 'Creating upa graph...'
+# upag = upa_graph(1347, 2)
+# print 'Nodes: ', len(upag)
+# print 'Edges:', edges(upag)
+# upa = compute_resilience(upag, random_order(upag))
+# print upa
+import time
+n = range(10, 1000, 10)
+m = 5
+norm = []
+fast = []
+for i in n:
+    g = upa_graph(i, m)
+    starttime = time.clock()
+    tmp.targeted_order(g)
+    endtime = time.clock()
+    norm.append(endtime-starttime)
+    starttime = time.clock()
+    fast_targeted_order(g)
+    endtime = time.clock()
+    fast.append(endtime-starttime)
+print norm
+print fast
 
-print 'Creating er graph...'
-p = 3112/float(1347*1346/2)
-erg = er_graph2(1347, p)
-print 'Nodes: ', len(erg)
-print 'Edges:', edges(erg)
-er = compute_resilience(erg, random_order(erg))
-print er
 
-print 'Creating upa graph...'
-upag = upa_graph(1347, 2)
-print 'Nodes: ', len(upag)
-print 'Edges:', edges(upag)
-upa = compute_resilience(upag, random_order(upag))
-print upa
-
-
-
-import matplotlib.pyplot as plt
-def legend_example():
-    """
-    Plot an example with two curves with legends
-    """
-    nodes_removed = range(1348)
-    y1 = ld
-    y2 = er
-    y3 = upa
-#     up = map(lambda x: (1347-x)*1.25, nodes_removed)
-#     down = map(lambda x: (1347-x)*0.75, nodes_removed)
-
-    plt.plot(nodes_removed, y1, '-b', label='Computer network')
-    plt.plot(nodes_removed, y2, '-r', label='ER graph network (p=%.4f)' %p)
-    plt.plot(nodes_removed, y3, '-g', label='UPA graph network (m=2)')
-#     plt.plot(nodes_removed, up, '-y', label='up')
-#     plt.plot(nodes_removed, down, '-y', label='down')
-#     plt.plot((0.2*1347,0.2*1347), (0,1800))
-    line = plt.Polygon([[0,1347*0.75],[1347*0.2,1374*0.8*0.75],[1347*0.2,1374*0.8*1.25],[0,1347*1.25]], color='y', alpha=0.5, label='First 20% resilient range')
-    plt.gca().add_patch(line)
-    plt.ylim(0, 1800)
-    plt.legend(loc='upper right')
-    plt.xlabel('Number of nodes disconnected')
-    plt.ylabel('The size of the largest connect component')
-    plt.title('Network resilience under an attack')
-    plt.show()
-
-legend_example()
+# import matplotlib.pyplot as plt
+# def legend_example():
+#     """
+#     Plot an example with two curves with legends
+#     """
+#     nodes_removed = range(1348)
+#     y1 = ld
+#     y2 = er
+#     y3 = upa
+# #     up = map(lambda x: (1347-x)*1.25, nodes_removed)
+# #     down = map(lambda x: (1347-x)*0.75, nodes_removed)
+# 
+#     plt.plot(nodes_removed, y1, '-b', label='Computer network')
+#     plt.plot(nodes_removed, y2, '-r', label='ER graph network (p=%.4f)' %p)
+#     plt.plot(nodes_removed, y3, '-g', label='UPA graph network (m=2)')
+# #     plt.plot(nodes_removed, up, '-y', label='up')
+# #     plt.plot(nodes_removed, down, '-y', label='down')
+# #     plt.plot((0.2*1347,0.2*1347), (0,1800))
+#     line = plt.Polygon([[0,1347*0.75],[1347*0.2,1374*0.8*0.75],[1347*0.2,1374*0.8*1.25],[0,1347*1.25]], color='y', alpha=0.5, label='First 20% resilient range')
+#     plt.gca().add_patch(line)
+#     plt.ylim(0, 1800)
+#     plt.legend(loc='upper right')
+#     plt.xlabel('Number of nodes disconnected')
+#     plt.ylabel('The size of the largest connect component')
+#     plt.title('Network resilience under an attack')
+#     plt.show()
+# 
+# legend_example()
