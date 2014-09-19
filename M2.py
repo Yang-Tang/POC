@@ -4,6 +4,7 @@ blabla
 
 from collections import deque
 import random
+import itertools
 
 class UPATrial:
     """
@@ -115,12 +116,13 @@ def compute_resilience(ugraph, attack_order):
     for node in attack_order:
         #print 'rm: ', node
         n += 1
-        if n % 20 == 0:
-            print 100*n/l, '%'
+        if n % 100 == 0:
+            print 100*n/l, '%',
         ugraph = rm_node(ugraph, node)
         #ugraph = tmp.delete_node(ugraph, node)
         lst.append(largest_cc_size(ugraph))
         #print ugraph
+    print '\n'
     return lst
 
 def er_graph(n, p):
@@ -130,11 +132,24 @@ def er_graph(n, p):
         g[i] = set([])
     for i in v:
         for j in v:
-            if i <> j and not j in g[i]:
+#             if i <> j and not j in g[i]:
+            if i <> j :
                 a = random.random()
                 if a < p:
                     g[i] |= set([j])
                     g[j] |= set([i])
+    return g
+
+def er_graph2(n, p):
+    g = {}
+    for i in range(n):
+        g[i] = set()
+    v = itertools.combinations(range(n), 2)
+    for edge in v:
+        a = random.random()
+        if a < p:
+            g[edge[0]].add(edge[1])
+            g[edge[1]].add(edge[0])
     return g
 
 def make_complete_graph(num_nodes):
@@ -162,18 +177,64 @@ def random_order(ugraph):
     random.shuffle(lst)
     return lst
 
+def edges(ugraph):
+    n = 0
+    for nodes in ugraph.values():
+        n += len(nodes)
+    return n/2
+
+print 'Creating ld graph...'
 import tmp
-NETWORK_URL = "http://storage.googleapis.com/codeskulptor-alg/alg_rf7.txt"
+NETWORK_URL = "alg_rf7.txt"
+# NETWORK_URL = "http://storage.googleapis.com/codeskulptor-alg/alg_rf7.txt"
 ldg = tmp.load_graph(NETWORK_URL)
+print 'Nodes: ', len(ldg)
+print 'Edges:', edges(ldg)
+ld = compute_resilience(ldg, random_order(ldg))
+print ld
 
 print 'Creating er graph...'
-erg = er_graph(10, 0.5)
+p = 3112/float(1347*1346/2)
+erg = er_graph2(1347, p)
+print 'Nodes: ', len(erg)
+print 'Edges:', edges(erg)
+er = compute_resilience(erg, random_order(erg))
+print er
 
 print 'Creating upa graph...'
-upag = upa_graph(1000, 10)
+upag = upa_graph(1347, 2)
+print 'Nodes: ', len(upag)
+print 'Edges:', edges(upag)
+upa = compute_resilience(upag, random_order(upag))
+print upa
 
-g = upag
 
-print 'caculating...'
-print compute_resilience(g, random_order(g))
-#print g
+
+import matplotlib.pyplot as plt
+def legend_example():
+    """
+    Plot an example with two curves with legends
+    """
+    nodes_removed = range(1348)
+    y1 = ld
+    y2 = er
+    y3 = upa
+#     up = map(lambda x: (1347-x)*1.25, nodes_removed)
+#     down = map(lambda x: (1347-x)*0.75, nodes_removed)
+
+    plt.plot(nodes_removed, y1, '-b', label='Computer network')
+    plt.plot(nodes_removed, y2, '-r', label='ER graph network (p=%.4f)' %p)
+    plt.plot(nodes_removed, y3, '-g', label='UPA graph network (m=2)')
+#     plt.plot(nodes_removed, up, '-y', label='up')
+#     plt.plot(nodes_removed, down, '-y', label='down')
+#     plt.plot((0.2*1347,0.2*1347), (0,1800))
+    line = plt.Polygon([[0,1347*0.75],[1347*0.2,1374*0.8*0.75],[1347*0.2,1374*0.8*1.25],[0,1347*1.25]], color='y', alpha=0.5, label='First 20% resilient range')
+    plt.gca().add_patch(line)
+    plt.ylim(0, 1800)
+    plt.legend(loc='upper right')
+    plt.xlabel('Number of nodes disconnected')
+    plt.ylabel('The size of the largest connect component')
+    plt.title('Network resilience under an attack')
+    plt.show()
+
+legend_example()
