@@ -5,7 +5,7 @@ blabla
 from collections import deque
 import random
 import itertools
-
+import M2_help as help
 
 class UPATrial:
     """
@@ -114,6 +114,7 @@ def compute_resilience(ugraph, attack_order):
     lst = [largest_cc_size(ugraph)]
     n = -1
     l = len(ugraph)
+    print l
     for node in attack_order:
         #print 'rm: ', node
         n += 1
@@ -185,24 +186,25 @@ def edges(ugraph):
     return n/2
 
 def fast_targeted_order(ugraph):
+    new_graph = help.copy_graph(ugraph)
     degreesets = {}
-    for degree in range(len(ugraph)):
+    for degree in range(len(new_graph)):
         degreesets[degree] = set()
-    for node in ugraph:
-        degree = len(ugraph[node])
+    for node in new_graph:
+        degree = len(new_graph[node])
         degreesets[degree].add(node)
     lst = []
     i = 0
-    for degree in range(len(ugraph)-1, -1, -1):
+    for degree in range(len(new_graph)-1, -1, -1):
         while len(degreesets[degree]) > 0:
             node = degreesets[degree].pop()
-            for neighber in ugraph[node]:
-                nb_deg = len(ugraph[neighber])
+            for neighber in new_graph[node]:
+                nb_deg = len(new_graph[neighber])
                 degreesets[nb_deg].remove(neighber)
                 degreesets[nb_deg - 1].add(neighber)
             lst.append(node)
             i += 1
-            ugraph = rm_node(ugraph, node)
+            new_graph = rm_node(new_graph, node)
     return lst
 
 
