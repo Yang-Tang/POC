@@ -7,9 +7,9 @@ def build_scoring_matrix(alphabet, diag_score, off_diag_score, dash_score):
     bla
     """
     matrix = dict()
-    for row in (alphabet + '-'):
+    for row in (alphabet | set(['-'])):
         matrix[row] = dict()
-        for col in (alphabet + '-'):
+        for col in (alphabet | set(['-'])):
             if (row == '-' or col == '-'):
                 score = dash_score
             elif row == col:
@@ -114,7 +114,7 @@ def compute_local_alignment(seq_x, seq_y, scoring_matrix, alignment_matrix):
         
     
 
-
+print build_scoring_matrix(set(['A', 'C', 'T', 'G']), 6, 2, -4)
 # s = build_scoring_matrix('ATGC', 10, 4, -1)
 # seq_x = 'AAAGCCC'
 # seq_y = 'AAACCC'
